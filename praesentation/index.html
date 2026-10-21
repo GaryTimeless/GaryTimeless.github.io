@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#1f2e36">
+  <title>Gregory Schenk · Präsentation</title>
+  <link rel="preload" as="image" href="folien/folie-1.webp">
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1f2e36; color: #f6f7f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: #1f2e36; }
+    .stage { flex: 1; min-height: 0; display: grid; place-items: center; position: relative; touch-action: pan-y pinch-zoom; }
+    .slide { width: 100%; height: 100%; min-height: 0; object-fit: contain; display: block; user-select: none; -webkit-user-drag: none; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 10px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); border-top: 1px solid #48606a; }
+    .title { font-size: 14px; font-weight: 600; }
+    .controls { display: flex; align-items: center; gap: 8px; }
+    button { background: transparent; border: 1px solid #76918f; border-radius: 5px; color: inherit; min-height: 40px; min-width: 40px; padding: 7px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+    button:hover:enabled { background: #38504f; }
+    button:disabled { opacity: .35; cursor: default; }
+    button:focus-visible, a:focus-visible { outline: 3px solid #b2d5cc; outline-offset: 3px; }
+    output { font-size: 14px; min-width: 65px; text-align: center; font-variant-numeric: tabular-nums; }
+    .error { position: absolute; padding: 20px; background: #1f2e36; text-align: center; }
+    .error a { color: #b2d5cc; }
+    [hidden] { display: none !important; }
+    @media (max-width: 520px) { .title { display: none; } .toolbar { justify-content: center; } }
+  </style>
+</head>
+<body>
+  <main id="presentation" aria-label="Präsentation von Gregory Schenk">
+    <div class="stage" id="stage">
+      <img class="slide" id="slide" src="folien/folie-1.webp" width="2400" height="1352" alt="Folie 1 von 8: Gregory Schenk" fetchpriority="high" draggable="false">
+      <div class="error" id="error" role="alert" hidden>
+        <p>Diese Folie konnte nicht geladen werden. Bitte die Seite neu laden.</p>
+        <a href="gregory-schenk.pdf">Original-PDF im Browser öffnen</a>
+      </div>
+    </div>
+    <footer class="toolbar">
+      <span class="title">Gregory Schenk</span>
+      <nav class="controls" aria-label="Foliensteuerung">
+        <button id="previous" type="button" aria-label="Vorherige Folie" title="Vorherige Folie (Pfeil links)" disabled>←</button>
+        <output id="counter" aria-live="polite" aria-atomic="true" aria-label="Aktuelle Folie">1 / 8</output>
+        <button id="next" type="button" aria-label="Nächste Folie" title="Nächste Folie (Pfeil rechts oder Leertaste)">→</button>
+        <button id="fullscreen" type="button" title="Vollbild ein/aus (F)">Vollbild</button>
+      </nav>
+    </footer>
+  </main>
+  <noscript>
+    <style>main { display: none; } .all-slides img { width: 100%; height: auto; display: block; margin-bottom: 16px; }</style>
+    <div class="all-slides">
+      <img src="folien/folie-1.webp" alt="Folie 1: Gregory Schenk">
+      <img src="folien/folie-2.webp" alt="Folie 2: Werdegang">
+      <img src="folien/folie-3.webp" alt="Folie 3: Motivation">
+      <img src="folien/folie-4.webp" alt="Folie 4: Suchprofil">
+      <img src="folien/folie-5.webp" alt="Folie 5: Finanzierung und Zeitplan">
+      <img src="folien/folie-6.webp" alt="Folie 6: Warum ich?">
+      <img src="folien/folie-7.webp" alt="Folie 7: Gespräch und Kontakt">
+      <img src="folien/folie-8.webp" alt="Folie 8: Marktbeispiele">
+    </div>
+  </noscript>
+  <script>
+    'use strict';
+    const titles = ['Gregory Schenk', 'Werdegang', 'Motivation', 'Suchprofil', 'Finanzierung und Zeitplan', 'Warum ich?', 'Gespräch und Kontakt', 'Marktbeispiele'];
+    const slide = document.getElementById('slide');
+    const previous = document.getElementById('previous');
+    const next = document.getElementById('next');
+    const fullscreen = document.getElementById('fullscreen');
+    const stage = document.getElementById('stage');
+    const error = document.getElementById('error');
+    const preloaded = [];
+    let current = 1;
+
+    function show(number) {
+      current = Math.max(1, Math.min(titles.length, number));
+      error.hidden = true;
+      slide.src = `folien/folie-${current}.webp`;
+      slide.alt = `Folie ${current} von ${titles.length}: ${titles[current - 1]}`;
+      document.getElementById('counter').textContent = `${current} / ${titles.length}`;
+      previous.disabled = current === 1;
+      next.disabled = current === titles.length;
+      history.replaceState(null, '', `#${current}`);
+    }
+
+    function fromHash() {
+      const number = Number(location.hash.slice(1));
+      show(Number.isInteger(number) && number > 0 ? number : 1);
+    }
+
+    async function toggleFullscreen() {
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await document.getElementById('presentation').requestFullscreen();
+      } catch (_) {
+        fullscreen.textContent = 'Vollbild: F11';
+      }
+    }
+
+    previous.addEventListener('click', () => show(current - 1));
+    next.addEventListener('click', () => show(current + 1));
+    fullscreen.addEventListener('click', toggleFullscreen);
+    fullscreen.hidden = !document.fullscreenEnabled;
+    document.addEventListener('fullscreenchange', () => {
+      fullscreen.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
+    });
+    document.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('input, textarea, select, [contenteditable]')) return;
+      if ((event.key === ' ' || event.key === 'Enter') && event.target.closest('button, a')) return;
+      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(event.key)) {
+        event.preventDefault(); show(current + 1);
+      } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(event.key)) {
+        event.preventDefault(); show(current - 1);
+      } else if (event.key === 'Home') {
+        event.preventDefault(); show(1);
+      } else if (event.key === 'End') {
+        event.preventDefault(); show(titles.length);
+      } else if (event.key.toLowerCase() === 'f') {
+        event.preventDefault(); if (!fullscreen.hidden) toggleFullscreen();
+      }
+    });
+
+    let touchStart = null;
+    stage.addEventListener('touchstart', event => {
+      touchStart = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+    }, { passive: true });
+    stage.addEventListener('touchmove', event => {
+      if (event.touches.length !== 1) touchStart = null;
+    }, { passive: true });
+    stage.addEventListener('touchcancel', () => { touchStart = null; });
+    stage.addEventListener('touchend', event => {
+      if (!touchStart || !event.changedTouches.length) return;
+      const dx = event.changedTouches[0].clientX - touchStart.x;
+      const dy = event.changedTouches[0].clientY - touchStart.y;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) show(current + (dx < 0 ? 1 : -1));
+      touchStart = null;
+    }, { passive: true });
+    slide.addEventListener('error', () => { error.hidden = false; });
+    slide.addEventListener('load', () => { error.hidden = true; });
+    window.addEventListener('hashchange', fromHash);
+    fromHash();
+    for (let number = 1; number <= titles.length; number++) {
+      const image = new Image();
+      image.src = `folien/folie-${number}.webp`;
+      preloaded.push(image);
+    }
+  </script>
+</body>
+</html>
